@@ -84,9 +84,15 @@ public class MainActivity extends AppCompatActivity {
     protected void sendMessage() {
         try {
             //String messageStr = "Hello World";
-            String messageStr = Float.toString(orientations[0]) + "-";
-            messageStr += Float.toString(orientations[1]) + "-";
-            messageStr += Float.toString(orientations[2]);
+            Integer[] orInt = new Integer[3];
+
+            orInt[0] = (int)orientations[0];
+            orInt[1] = (int)orientations[2];
+            orInt[2] = (int)orientations[2];
+
+            String messageStr = Integer.toString(orInt[0]) + "|";
+            messageStr += Integer.toString(orInt[1]) + "|";
+            messageStr += Integer.toString(orInt[2]);
             int server_port = 7777;
             InetAddress local = InetAddress.getByName("192.168.2.193");
             int msg_length = messageStr.length();
