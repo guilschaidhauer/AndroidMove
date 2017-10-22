@@ -29,8 +29,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sendMessage();
-
         sensorManager =
                 (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -62,15 +60,15 @@ public class MainActivity extends AppCompatActivity {
                     orientations[i] = (float)(Math.toDegrees(orientations[i]));
                 }
 
-                /*if(orientations[2] > 45) {
+                if(orientations[2] > 45) {
                     getWindow().getDecorView().setBackgroundColor(Color.YELLOW);
                 } else if(orientations[2] < -45) {
                     getWindow().getDecorView().setBackgroundColor(Color.BLUE);
                 } else if(Math.abs(orientations[2]) < 10) {
                     getWindow().getDecorView().setBackgroundColor(Color.WHITE);
-                }*/
+                }
 
-                //sendMessage();
+                sendMessage();
             }
 
             @Override
@@ -85,7 +83,10 @@ public class MainActivity extends AppCompatActivity {
 
     protected void sendMessage() {
         try {
-            String messageStr = "Hello World";
+            //String messageStr = "Hello World";
+            String messageStr = Float.toString(orientations[0]) + "-";
+            messageStr += Float.toString(orientations[1]) + "-";
+            messageStr += Float.toString(orientations[2]);
             int server_port = 7777;
             InetAddress local = InetAddress.getByName("192.168.2.193");
             int msg_length = messageStr.length();
