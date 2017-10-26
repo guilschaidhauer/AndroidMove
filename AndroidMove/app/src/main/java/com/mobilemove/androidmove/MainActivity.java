@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             Integer[] orInt = new Integer[3];
 
             orInt[0] = (int)orientations[0];
-            orInt[1] = (int)orientations[2];
+            orInt[1] = (int)orientations[1];
             orInt[2] = (int)orientations[2];
 
             String messageStr = Integer.toString(orInt[0]) + "|";
