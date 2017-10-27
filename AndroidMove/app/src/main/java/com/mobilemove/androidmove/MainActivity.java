@@ -97,15 +97,15 @@ public class MainActivity extends AppCompatActivity{
             //orInt[1] = (int)orientations[1];
             //orInt[2] = (int)orientations[2];
 
-            orInt[0] = (int)(gyro[0] * 1000000);
-            orInt[1] = (int)(gyro[1] * 1000000);
-            orInt[2] = (int)(gyro[2] * 1000000);
-            orInt[3] = (int)(gyro[3] * 1000000);
+            //orInt[0] = (int)(gyro[0] * 1000000);
+            //orInt[1] = (int)(gyro[1] * 1000000);
+            //orInt[2] = (int)(gyro[2] * 1000000);
+            //orInt[3] = (int)(gyro[3] * 1000000);
 
-            String messageStr = Integer.toString(orInt[0]) + "|";
-            messageStr += Integer.toString(orInt[1]) + "|";
-            messageStr += Integer.toString(orInt[2]) + "|";
-            messageStr += Integer.toString(orInt[3]);
+            String messageStr = Float.toString(gyro[0]) + "|";
+            messageStr += Float.toString(gyro[1]) + "|";
+            messageStr += Float.toString(gyro[2]) + "|";
+            messageStr += Float.toString(gyro[3]);
 
             /*String messageStr = Float.toString(gyro[0]) + "|";
             messageStr += Float.toString(gyro[1]) + "|";
