@@ -79,11 +79,11 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run() {
                 sendMessage();
-                handler.postDelayed(this, 10);
+                handler.postDelayed(this, 15);
             }
         };
 
-        handler.postDelayed(r, 10);
+        handler.postDelayed(r, 15);
     }
 
     protected void sendMessage() {
