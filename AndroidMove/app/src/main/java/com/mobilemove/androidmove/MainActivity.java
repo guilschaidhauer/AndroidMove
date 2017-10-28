@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorEvent;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.graphics.Color;
@@ -17,7 +18,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     SensorManager sensorManager;
     Sensor rotationVectorSensor;
@@ -28,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        orientations = new float[3];
 
         sensorManager =
                 (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -59,16 +62,6 @@ public class MainActivity extends AppCompatActivity {
                 for(int i = 0; i < 3; i++) {
                     orientations[i] = (float)(Math.toDegrees(orientations[i]));
                 }
-
-                if(orientations[2] > 45) {
-                    getWindow().getDecorView().setBackgroundColor(Color.YELLOW);
-                } else if(orientations[2] < -45) {
-                    getWindow().getDecorView().setBackgroundColor(Color.BLUE);
-                } else if(Math.abs(orientations[2]) < 10) {
-                    getWindow().getDecorView().setBackgroundColor(Color.WHITE);
-                }
-
-                sendMessage();
             }
 
             @Override
@@ -79,14 +72,29 @@ public class MainActivity extends AppCompatActivity {
         // Register it
         sensorManager.registerListener(rvListener,
                 rotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        final Handler handler = new Handler();
+
+        final Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                sendMessage();
+                handler.postDelayed(this, 10);
+            }
+        };
+
+        handler.postDelayed(r, 10);
     }
 
     protected void sendMessage() {
+        getWindow().getDecorView().setBackgroundColor(Color.GREEN);
         try {
             //String messageStr = "Hello World";
             String messageStr = Float.toString(orientations[0]) + "|";
             messageStr += Float.toString(orientations[1]) + "|";
             messageStr += Float.toString(orientations[2]);
+
+            //String messageStr = "99|99|99";
             int server_port = 7777;
             InetAddress local = InetAddress.getByName("192.168.2.193");
             int msg_length = messageStr.length();
@@ -98,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
             DatagramPacket p = new DatagramPacket(message, msg_length, local, server_port);
             s.send(p);//properly able to send data. i receive data to server
+            getWindow().getDecorView().setBackgroundColor(Color.CYAN);
         }
         catch(Exception ex)
         {
