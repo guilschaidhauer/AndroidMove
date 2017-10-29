@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity{
             messageStr += Float.toString(orientations[2]);
 
             //String messageStr = "99|99|99";
-            int server_port = 7777;
+            int server_port = 8888;
             InetAddress local = InetAddress.getByName("192.168.2.193");
             int msg_length = messageStr.length();
             byte[] message = messageStr.getBytes();
