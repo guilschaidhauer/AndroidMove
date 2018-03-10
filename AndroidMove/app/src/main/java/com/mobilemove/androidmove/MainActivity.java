@@ -18,97 +18,58 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.view.Surface;
+import android.view.WindowManager;
+
+
 
 public class MainActivity extends AppCompatActivity{
 
-    SensorManager sensorManager;
-
-
-    Sensor gyroscopeSensor;
-
-    Sensor rotationVectorSensor;
-
     float[] orientations;
 
-    float acceleration;
+    public interface Listener {
+        void onOrientationChanged(float pitch, float roll);
+    }
+
+    private static final int SENSOR_DELAY_MICROS = 50 * 1000; // 50ms
+
+    private final SensorManager mSensorManager;
+    private final Sensor mRotationSensor;
+    private final WindowManager mWindowManager;
+
+    private int mLastAccuracy;
+    private Listener mListener;
+
+    public MainActivity(SensorManager sensorManager, WindowManager windowManager) {
+        mSensorManager = sensorManager;
+        mWindowManager = windowManager;
+
+        // Can be null if the sensor hardware is not available
+        mRotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+    }
+
+    public void startListening(Listener listener) {
+        if (mListener == listener) {
+            return;
+        }
+        mListener = listener;
+        if (mRotationSensor == null) {
+            //Log.w("Rotation vector sensor not available; will not provide orientation data.");
+            return;
+        }
+
+        mSensorManager.registerListener((SensorEventListener) this, mRotationSensor, SENSOR_DELAY_MICROS);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-
-        sensorManager =
-                (SensorManager) getSystemService(SENSOR_SERVICE);
-
-        gyroscopeSensor =
-                sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-
-        rotationVectorSensor =
-                sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
-
-        // Create listener
-        SensorEventListener rvListener2 = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-
-                acceleration = sensorEvent.values[0];
-
-                if(sensorEvent.values[0] > 0.5f) { // anticlockwise
-                    getWindow().getDecorView().setBackgroundColor(Color.BLUE);
-                } else if(sensorEvent.values[0] < -0.5f) { // clockwise
-                    getWindow().getDecorView().setBackgroundColor(Color.YELLOW);
-                }
-            }
-
-
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-            }
-        };
-
-        // Register it
-        sensorManager.registerListener(rvListener2,
-                gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
-
-        // Create listener
-        SensorEventListener rvListener = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                //getWindow().getDecorView().setBackgroundColor(Color.BLUE);
-
-                float[] rotationMatrix = new float[16];
-                SensorManager.getRotationMatrixFromVector(
-                        rotationMatrix, sensorEvent.values);
-
-                // Remap coordinate system
-                float[] remappedRotationMatrix = new float[16];
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_X,
-                        SensorManager.AXIS_Z,
-                        remappedRotationMatrix);
-
-                // Convert to orientations
-                orientations = new float[3];
-                SensorManager.getOrientation(remappedRotationMatrix, orientations);
-
-                for(int i = 0; i < 3; i++) {
-                    orientations[i] = (float)(Math.toDegrees(orientations[i]));
-                }
-
-                orientations[0] = acceleration;
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-            }
-        };
-
-        // Register it
-        sensorManager.registerListener(rvListener,
-                rotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         final Handler handler = new Handler();
 
