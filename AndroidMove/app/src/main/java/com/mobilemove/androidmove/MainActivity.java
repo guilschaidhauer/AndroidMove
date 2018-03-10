@@ -22,9 +22,15 @@ import java.net.UnknownHostException;
 public class MainActivity extends AppCompatActivity{
 
     SensorManager sensorManager;
+
+
+    Sensor gyroscopeSensor;
+
     Sensor rotationVectorSensor;
 
     float[] orientations;
+
+    float acceleration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,13 +38,40 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        orientations = new float[3];
 
         sensorManager =
                 (SensorManager) getSystemService(SENSOR_SERVICE);
 
+        gyroscopeSensor =
+                sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
         rotationVectorSensor =
                 sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+
+        // Create listener
+        SensorEventListener rvListener2 = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent sensorEvent) {
+
+                acceleration = sensorEvent.values[0];
+
+                if(sensorEvent.values[0] > 0.5f) { // anticlockwise
+                    getWindow().getDecorView().setBackgroundColor(Color.BLUE);
+                } else if(sensorEvent.values[0] < -0.5f) { // clockwise
+                    getWindow().getDecorView().setBackgroundColor(Color.YELLOW);
+                }
+            }
+
+
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int i) {
+            }
+        };
+
+        // Register it
+        sensorManager.registerListener(rvListener2,
+                gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         // Create listener
         SensorEventListener rvListener = new SensorEventListener() {
@@ -64,6 +97,8 @@ public class MainActivity extends AppCompatActivity{
                 for(int i = 0; i < 3; i++) {
                     orientations[i] = (float)(Math.toDegrees(orientations[i]));
                 }
+
+                orientations[0] = acceleration;
             }
 
             @Override
@@ -89,7 +124,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     protected void sendMessage() {
-        getWindow().getDecorView().setBackgroundColor(Color.GREEN);
+        //getWindow().getDecorView().setBackgroundColor(Color.GREEN);
         try {
             //String messageStr = "Hello World";
             String messageStr = Float.toString(orientations[0]) + "|";
@@ -109,11 +144,11 @@ public class MainActivity extends AppCompatActivity{
 
             DatagramPacket p = new DatagramPacket(message, msg_length, local, server_port);
             s.send(p);//properly able to send data. i receive data to server
-            getWindow().getDecorView().setBackgroundColor(Color.CYAN);
+            //getWindow().getDecorView().setBackgroundColor(Color.CYAN);
         }
         catch(Exception ex)
         {
-            getWindow().getDecorView().setBackgroundColor(Color.RED);
+            //getWindow().getDecorView().setBackgroundColor(Color.RED);
             ex.printStackTrace();
         }
     }
