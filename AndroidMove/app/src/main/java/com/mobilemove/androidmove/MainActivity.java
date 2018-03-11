@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        orientations = new float[3];
+        orientations = new float[4];
 
         sensorManager =
                 (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -46,24 +46,12 @@ public class MainActivity extends AppCompatActivity{
             public void onSensorChanged(SensorEvent sensorEvent) {
                 //getWindow().getDecorView().setBackgroundColor(Color.BLUE);
 
-                float[] rotationMatrix = new float[16];
-                SensorManager.getRotationMatrixFromVector(
-                        rotationMatrix, sensorEvent.values);
-
-                // Remap coordinate system
-                float[] remappedRotationMatrix = new float[16];
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_X,
-                        SensorManager.AXIS_Z,
-                        remappedRotationMatrix);
-
-                // Convert to orientations
-                orientations = new float[3];
-                SensorManager.getOrientation(remappedRotationMatrix, orientations);
-
-                for(int i = 0; i < 3; i++) {
-                    orientations[i] = (float)(Math.toDegrees(orientations[i]));
+                for (int i=0; i<4; i++) {
+                    orientations[i] = sensorEvent.values[i] * 10000;
                 }
+                String temp = String.valueOf(orientations[0]);
+
+                Log.i("STATE", temp);
             }
 
             @Override
@@ -94,7 +82,8 @@ public class MainActivity extends AppCompatActivity{
             //String messageStr = "Hello World";
             String messageStr = Float.toString(orientations[0]) + "|";
             messageStr += Float.toString(orientations[1]) + "|";
-            messageStr += Float.toString(orientations[2]);
+            messageStr += Float.toString(orientations[2]) + "|";
+            messageStr += Float.toString(orientations[3]);
 
             //String messageStr = "99|99|99";
             int server_port = 8888;
