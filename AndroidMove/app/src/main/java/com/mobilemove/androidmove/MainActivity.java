@@ -18,58 +18,62 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.view.Surface;
-import android.view.WindowManager;
-
-
 
 public class MainActivity extends AppCompatActivity{
 
+    SensorManager sensorManager;
+    Sensor rotationVectorSensor;
+
     float[] orientations;
-
-    public interface Listener {
-        void onOrientationChanged(float pitch, float roll);
-    }
-
-    private static final int SENSOR_DELAY_MICROS = 50 * 1000; // 50ms
-
-    private final SensorManager mSensorManager;
-    private final Sensor mRotationSensor;
-    private final WindowManager mWindowManager;
-
-    private int mLastAccuracy;
-    private Listener mListener;
-
-    public MainActivity(SensorManager sensorManager, WindowManager windowManager) {
-        mSensorManager = sensorManager;
-        mWindowManager = windowManager;
-
-        // Can be null if the sensor hardware is not available
-        mRotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-    }
-
-    public void startListening(Listener listener) {
-        if (mListener == listener) {
-            return;
-        }
-        mListener = listener;
-        if (mRotationSensor == null) {
-            //Log.w("Rotation vector sensor not available; will not provide orientation data.");
-            return;
-        }
-
-        mSensorManager.registerListener((SensorEventListener) this, mRotationSensor, SENSOR_DELAY_MICROS);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        orientations = new float[3];
+
+        sensorManager =
+                (SensorManager) getSystemService(SENSOR_SERVICE);
+
+        rotationVectorSensor =
+                sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+
+        // Create listener
+        SensorEventListener rvListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent sensorEvent) {
+                //getWindow().getDecorView().setBackgroundColor(Color.BLUE);
+
+                float[] rotationMatrix = new float[16];
+                SensorManager.getRotationMatrixFromVector(
+                        rotationMatrix, sensorEvent.values);
+
+                // Remap coordinate system
+                float[] remappedRotationMatrix = new float[16];
+                SensorManager.remapCoordinateSystem(rotationMatrix,
+                        SensorManager.AXIS_X,
+                        SensorManager.AXIS_Z,
+                        remappedRotationMatrix);
+
+                // Convert to orientations
+                orientations = new float[3];
+                SensorManager.getOrientation(remappedRotationMatrix, orientations);
+
+                for(int i = 0; i < 3; i++) {
+                    orientations[i] = (float)(Math.toDegrees(orientations[i]));
+                }
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int i) {
+            }
+        };
+
+        // Register it
+        sensorManager.registerListener(rvListener,
+                rotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         final Handler handler = new Handler();
 
@@ -85,7 +89,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     protected void sendMessage() {
-        //getWindow().getDecorView().setBackgroundColor(Color.GREEN);
+        getWindow().getDecorView().setBackgroundColor(Color.GREEN);
         try {
             //String messageStr = "Hello World";
             String messageStr = Float.toString(orientations[0]) + "|";
@@ -105,11 +109,11 @@ public class MainActivity extends AppCompatActivity{
 
             DatagramPacket p = new DatagramPacket(message, msg_length, local, server_port);
             s.send(p);//properly able to send data. i receive data to server
-            //getWindow().getDecorView().setBackgroundColor(Color.CYAN);
+            getWindow().getDecorView().setBackgroundColor(Color.CYAN);
         }
         catch(Exception ex)
         {
-            //getWindow().getDecorView().setBackgroundColor(Color.RED);
+            getWindow().getDecorView().setBackgroundColor(Color.RED);
             ex.printStackTrace();
         }
     }
