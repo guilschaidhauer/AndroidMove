@@ -87,8 +87,8 @@ public class MainActivity extends AppCompatActivity{
 
             //String messageStr = "99|99|99";
             int server_port = 8888;
-            InetAddress local = InetAddress.getByName("192.168.25.11");
-            //InetAddress local = InetAddress.getByName("192.168.43.227");
+            //InetAddress local = InetAddress.getByName("192.168.25.11");
+            InetAddress local = InetAddress.getByName("192.168.43.227");
             int msg_length = messageStr.length();
             byte[] message = messageStr.getBytes();
 
